@@ -14,16 +14,33 @@ public class PlayerController : MonoBehaviour
     private Vector3 m_MoveDirection = Vector3.zero;
     private Camera m_Camera;
     private CharacterController m_CharacterController;
+    private PortalManager m_PortalManager;
 
     // Start is called before the first frame update
     private void Start()
     {
         m_Camera = Camera.main;
         m_CharacterController = GetComponent<CharacterController>();
+        m_PortalManager = GameObject.Find("PortalManager").GetComponent<PortalManager>();
     }
 
     // Update is called once per frame
     private void Update()
+    {
+        Move();
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            FireBlue();
+        }
+
+        if (Input.GetMouseButtonDown(1))
+        {
+            FireRed();
+        }
+    }
+
+    private void Move()
     {
         transform.Rotate(0, Input.GetAxis("Mouse X") * m_RotateSpeed, 0);
 
@@ -50,5 +67,21 @@ public class PlayerController : MonoBehaviour
 
         m_MoveDirection.y += Physics.gravity.y * Time.deltaTime;
         m_CharacterController.Move(m_MoveDirection * Time.deltaTime);
+    }
+
+    private void FireBlue()
+    {
+        Vector3 start = m_Camera.transform.position;
+        Vector3 end = m_Camera.transform.forward;
+
+        m_PortalManager.SpawnBluePortal(start, end);
+    }
+
+    private void FireRed()
+    {
+        Vector3 start = m_Camera.transform.position;
+        Vector3 end = m_Camera.transform.forward;
+
+        m_PortalManager.SpawnRedPortal(start, end);
     }
 }
