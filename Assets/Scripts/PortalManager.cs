@@ -5,10 +5,17 @@ using UnityEngine;
 
 public class PortalManager : MonoBehaviour
 {
-    #region Portal Spawning
+    #region Attributes
+
+    [SerializeField] private GameObject _portalPrefab = null;
+    [SerializeField] private Camera _camera = null;
 
     private GameObject _redPortal = null;
     private GameObject _bluePortal = null;
+
+    #endregion
+
+    #region Portal Spawning
 
     public void SpawnBluePortal(Vector3 start, Vector3 end)
     {
@@ -80,9 +87,6 @@ public class PortalManager : MonoBehaviour
     #endregion
 
     #region Monobehaviour Functions
-
-    [SerializeField] private GameObject _portalPrefab = null;
-    [SerializeField] private Camera _camera = null;
 
     // Start is called before the first frame update
     void Start()

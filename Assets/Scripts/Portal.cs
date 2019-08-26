@@ -5,7 +5,7 @@ using UnityEngine;
 [RequireComponent(typeof(BoxCollider))]
 public class Portal : MonoBehaviour
 {
-    #region Editable Attributes
+    #region Attributes
 
     [SerializeField] private Portal _target = null;
     public Portal target
@@ -28,6 +28,8 @@ public class Portal : MonoBehaviour
         set { _color = value; }
     }
 
+    private MaterialPropertyBlock _propertyBlock = null;
+
     #endregion
 
     #region Teleportation
@@ -45,8 +47,6 @@ public class Portal : MonoBehaviour
     #endregion
 
     #region Monobehaviour Functions
-
-    private MaterialPropertyBlock _propertyBlock = null;
 
     // Start is called before the first frame update
     void Start()

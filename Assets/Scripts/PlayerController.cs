@@ -5,12 +5,20 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
 {
-    #region Movement
+    #region Attributes
 
     [SerializeField] private float _walkSpeed = 6.0f;
     [SerializeField] private float _jumpSpeed = 4.0f;
     [SerializeField] private float _rotateSpeed = 0.8f;
+
     private Vector3 _moveDirection = Vector3.zero;
+    private Transform _cameraTransform = null;
+    private PortalManager _portalManager = null;
+    private CharacterController _characterController = null;
+
+    #endregion
+
+    #region Movement
 
     private void Move()
     {
@@ -64,10 +72,6 @@ public class PlayerController : MonoBehaviour
     #endregion
 
     #region Monobehaviour Functions
-
-    private Transform _cameraTransform = null;
-    private PortalManager _portalManager = null;
-    private CharacterController _characterController = null;
 
     // Start is called before the first frame update
     private void Start()
