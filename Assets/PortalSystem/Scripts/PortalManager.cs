@@ -5,68 +5,39 @@ using UnityEngine;
 
 public class PortalManager : MonoBehaviour
 {
-    [SerializeField] private GameObject m_PortalPrefab;
-    private GameObject RedPortal;
-    private GameObject BluePortal;
-    private Camera m_Camera;
+    #region Portal Spawning
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        m_Camera = gameObject.AddComponent<Camera>();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        foreach (GameObject portalObject in GameObject.FindGameObjectsWithTag("Portal"))
-        {
-            Portal portal = portalObject.GetComponent<Portal>();
-            Portal target = portal.target;
-            if (portal && target)
-            {
-                m_Camera.transform.position = ConvertLocation(portal.transform, target.transform);
-                m_Camera.transform.rotation = ConvertRotation(portal.transform.rotation, target.transform.rotation);
-                //todo fix clip plane
-
-                Vector3 lookPosition = target.transform.worldToLocalMatrix.MultiplyPoint3x4(Camera.main.transform.position);
-                lookPosition = new Vector3(-lookPosition.x, lookPosition.y, -lookPosition.z);
-
-                m_Camera.nearClipPlane = lookPosition.magnitude;
-                m_Camera.targetTexture = target.renderTexture;
-                m_Camera.Render();
-            }
-        }
-    }
+    private GameObject _redPortal = null;
+    private GameObject _bluePortal = null;
 
     public void SpawnBluePortal(Vector3 start, Vector3 end)
     {
-        if (BluePortal)
+        if (_bluePortal)
         {
-            if (RedPortal)
+            if (_redPortal)
             {
-                RedPortal.GetComponent<Portal>().target = null;
+                _redPortal.GetComponent<Portal>().target = null;
             }
 
-            Destroy(BluePortal);
+            Destroy(_bluePortal);
         }
 
-        BluePortal = SpawnPortal(RedPortal, start, end, Color.blue);
+        _bluePortal = SpawnPortal(_redPortal, start, end, Color.blue);
     }
 
     public void SpawnRedPortal(Vector3 start, Vector3 end)
     {
-        if (RedPortal)
+        if (_redPortal)
         {
-            if (BluePortal)
+            if (_bluePortal)
             {
-                BluePortal.GetComponent<Portal>().target = null;
+                _bluePortal.GetComponent<Portal>().target = null;
             }
 
-            Destroy(RedPortal);
+            Destroy(_redPortal);
         }
 
-        RedPortal = SpawnPortal(BluePortal, start, end, Color.red);
+        _redPortal = SpawnPortal(_bluePortal, start, end, Color.red);
     }
 
     GameObject SpawnPortal(GameObject target, Vector3 start, Vector3 end, Color color)
@@ -76,10 +47,9 @@ public class PortalManager : MonoBehaviour
         RaycastHit hit;
         if (Physics.Raycast(start, end, out hit, 5000))
         {
-            portal = Instantiate(m_PortalPrefab, hit.point + (hit.normal * 0.31f), Quaternion.LookRotation(hit.normal, Vector3.up));
+            portal = Instantiate(_portalPrefab, hit.point + (hit.normal * 0.31f), Quaternion.LookRotation(hit.normal, Vector3.up));
             Portal portalComponent = portal.GetComponent<Portal>();
             portalComponent.color = color;
-            portalComponent.surface = hit.transform.gameObject;
 
             if (target)
             {
@@ -92,12 +62,12 @@ public class PortalManager : MonoBehaviour
         return portal;
     }
 
-    private Vector3 ConvertLocation(Transform portalTransform, Transform targetTransform)
+    private Vector3 ConvertLocation(Transform portalTransform, Transform targetTransform, out Vector3 nearClip)
     {
-        Vector3 lookPosition = targetTransform.worldToLocalMatrix.MultiplyPoint3x4(Camera.main.transform.position);
-        lookPosition = new Vector3(-lookPosition.x, lookPosition.y, -lookPosition.z);
+        nearClip = targetTransform.worldToLocalMatrix.MultiplyPoint3x4(Camera.main.transform.position);
+        nearClip = new Vector3(-nearClip.x, nearClip.y, -nearClip.z);
 
-        return portalTransform.localToWorldMatrix.MultiplyPoint3x4(lookPosition);
+        return portalTransform.localToWorldMatrix.MultiplyPoint3x4(nearClip);
     }
 
     private Quaternion ConvertRotation(Quaternion portalRotation, Quaternion targetRotation)
@@ -106,4 +76,38 @@ public class PortalManager : MonoBehaviour
 
         return difference * Camera.main.transform.rotation;
     }
+
+    #endregion
+
+    #region Monobehaviour Functions
+
+    [SerializeField] private GameObject _portalPrefab = null;
+    [SerializeField] private Camera _camera = null;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        _camera = gameObject.AddComponent<Camera>();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        foreach (GameObject portalObject in GameObject.FindGameObjectsWithTag("Portal"))
+        {
+            Portal portal = portalObject.GetComponent<Portal>();
+            Portal target = portal.target;
+            if (portal && target)
+            {
+                Vector3 nearClip;
+                _camera.transform.position = ConvertLocation(portal.transform, target.transform, out nearClip);
+                _camera.transform.rotation = ConvertRotation(portal.transform.rotation, target.transform.rotation);
+                _camera.nearClipPlane = nearClip.magnitude;
+                _camera.targetTexture = target.renderTexture;
+                _camera.Render();
+            }
+        }
+    }
+
+    #endregion
 }

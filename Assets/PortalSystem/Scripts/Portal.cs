@@ -5,12 +5,48 @@ using UnityEngine;
 [RequireComponent(typeof(BoxCollider))]
 public class Portal : MonoBehaviour
 {
-    public Portal target { get; set; }
-    public RenderTexture renderTexture { get; set; }
-    public Color color { get; set; }
-    public GameObject surface { get; set; }
+    #region Editable Attributes
 
-    private MaterialPropertyBlock m_PropertyBlock;
+    [SerializeField] private Portal _target = null;
+    public Portal target
+    {
+        get { return _target; }
+        set { _target = value; }
+    }
+
+    [SerializeField] private RenderTexture _renderTexture = null;
+    public RenderTexture renderTexture
+    {
+        get { return _renderTexture; }
+        set { _renderTexture = value; }
+    }
+
+    [SerializeField] private Color _color;
+    public Color color
+    {
+        get { return _color; }
+        set { _color = value; }
+    }
+
+    #endregion
+
+    #region Teleportation
+
+    private void Teleport(Transform other)
+    {
+        Vector3 localPosition = transform.worldToLocalMatrix.MultiplyPoint3x4(other.position);
+        localPosition = new Vector3(-localPosition.x, localPosition.y, -localPosition.z);
+        other.position = target.transform.localToWorldMatrix.MultiplyPoint3x4(localPosition);
+
+        Quaternion difference = target.transform.rotation * Quaternion.Inverse(transform.rotation * Quaternion.Euler(0, 180, 0));
+        other.rotation = difference * other.rotation;
+    }
+
+    #endregion
+
+    #region Monobehaviour Functions
+
+    private MaterialPropertyBlock _propertyBlock = null;
 
     // Start is called before the first frame update
     void Start()
@@ -19,10 +55,10 @@ public class Portal : MonoBehaviour
         renderTexture.autoGenerateMips = true;
         renderTexture.wrapMode = TextureWrapMode.Clamp;
 
-        m_PropertyBlock = new MaterialPropertyBlock();
-        m_PropertyBlock.SetColor("color", color);
-        m_PropertyBlock.SetTexture("_MainTex", renderTexture);
-        GetComponentInChildren<MeshRenderer>().SetPropertyBlock(m_PropertyBlock);
+        _propertyBlock = new MaterialPropertyBlock();
+        _propertyBlock.SetColor("color", color);
+        _propertyBlock.SetTexture("_MainTex", renderTexture);
+        GetComponentInChildren<MeshRenderer>().SetPropertyBlock(_propertyBlock);
     }
 
     // Update is called once per frame
@@ -40,13 +76,5 @@ public class Portal : MonoBehaviour
         }
     }
 
-    private void Teleport(Transform other)
-    {
-        Vector3 localPosition = transform.worldToLocalMatrix.MultiplyPoint3x4(other.position);
-        localPosition = new Vector3(-localPosition.x, localPosition.y, -localPosition.z);
-        other.position = target.transform.localToWorldMatrix.MultiplyPoint3x4(localPosition);
-
-        Quaternion difference = target.transform.rotation * Quaternion.Inverse(transform.rotation * Quaternion.Euler(0, 180, 0));
-        other.rotation = difference * other.rotation;
-    }
+    #endregion
 }
