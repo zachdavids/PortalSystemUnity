@@ -7,21 +7,21 @@ public class Portal : MonoBehaviour
 {
     #region Attributes
 
-    [SerializeField] private Portal _target = null;
-    public Portal target
+    private GameObject _target = null;
+    public GameObject target
     {
         get { return _target; }
         set { _target = value; }
     }
 
-    [SerializeField] private RenderTexture _renderTexture = null;
+    private RenderTexture _renderTexture = null;
     public RenderTexture renderTexture
     {
         get { return _renderTexture; }
         set { _renderTexture = value; }
     }
 
-    [SerializeField] private Color _color;
+    private Color _color;
     public Color color
     {
         get { return _color; }
@@ -38,9 +38,9 @@ public class Portal : MonoBehaviour
     {
         Vector3 localPosition = transform.worldToLocalMatrix.MultiplyPoint3x4(other.position);
         localPosition = new Vector3(-localPosition.x, localPosition.y, -localPosition.z);
-        other.position = target.transform.localToWorldMatrix.MultiplyPoint3x4(localPosition);
+        other.position = _target.transform.localToWorldMatrix.MultiplyPoint3x4(localPosition);
 
-        Quaternion difference = target.transform.rotation * Quaternion.Inverse(transform.rotation * Quaternion.Euler(0, 180, 0));
+        Quaternion difference = _target.transform.rotation * Quaternion.Inverse(transform.rotation);
         other.rotation = difference * other.rotation;
     }
 
@@ -59,11 +59,6 @@ public class Portal : MonoBehaviour
         _propertyBlock.SetColor("color", color);
         _propertyBlock.SetTexture("_MainTex", renderTexture);
         GetComponentInChildren<MeshRenderer>().SetPropertyBlock(_propertyBlock);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
     }
 
     private void OnTriggerStay(Collider other)
